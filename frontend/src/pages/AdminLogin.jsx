@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function AdminLogin() {
   const nav = useNavigate();
-  const [form, setForm] = React.useState({ username: "admin", password: "admin123" });
+  const [form, setForm] = React.useState({ username: "", password: "" });
   const [state, setState] = React.useState({ loading: false, msg: "" });
 
   React.useEffect(() => {
