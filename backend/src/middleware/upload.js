@@ -10,9 +10,12 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: "realstate_uploads",
-    allowed_formats: ["jpg", "png", "jpeg", "pdf"],
+  params: async (req, file) => {
+    return {
+      folder: "realstate_uploads",
+      resource_type: file.mimetype === "application/pdf" ? "raw" : "auto",
+      public_id: file.originalname.split(".")[0] + "_" + Date.now(),
+    };
   },
 });
 

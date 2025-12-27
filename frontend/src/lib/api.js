@@ -12,9 +12,14 @@ export function setAuthToken(token) {
   else delete api.defaults.headers.common.Authorization;
 }
 
-export function getFileUrl(path) {
+export function getFileUrl(path, isDownload = false) {
   if (!path) return "";
-  if (/^https?:\/\//i.test(path)) return path;
+  if (/^https?:\/\//i.test(path)) {
+    if (isDownload && path.includes("cloudinary.com")) {
+      return path.replace("/upload/", "/upload/fl_attachment/");
+    }
+    return path;
+  }
   return `${API_BASE}${path}`;
 }
 

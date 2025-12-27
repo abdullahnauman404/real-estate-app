@@ -278,7 +278,13 @@ export default function Home() {
                       <button className="map-view-btn" onClick={() => { setActive(m); setOpen(true); }}>
                         <i className="fas fa-eye"></i> View
                       </button>
-                      <a className="map-download-btn" href={getFileUrl(m.pdfUrl)} download={`${m.title.replace(/\s+/g, '_')}.pdf`} target="_blank" rel="noreferrer">
+                      <a
+                        className="map-download-btn"
+                        href={getFileUrl(m.pdfUrl, true)}
+                        download={`${m.title.replace(/\s+/g, '_')}.pdf`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         <i className="fas fa-download"></i> Download
                       </a>
                     </div>
@@ -511,7 +517,7 @@ export default function Home() {
                 <div className="map-popup-actions">
                   <a
                     className="btn btn-primary"
-                    href={getFileUrl(active.pdfUrl)}
+                    href={getFileUrl(active.pdfUrl, true)}
                     target="_blank"
                     rel="noreferrer"
                     download
