@@ -492,92 +492,91 @@ export default function Home() {
       {/* Modals remain same logic-wise but maybe styled differently due to CSS updates. 
         I'll keep the Modal component structure but ensure it mounts correctly. 
     */}
-      <Modal open={open} title={active?.title || "Property"} onClose={() => setOpen(false)} width={1000}>
+      <Modal open={open} title={active?.title || "Property"} onClose={() => setOpen(false)} width={1100}>
         {active ? (
-          <div className="property-popup-grid">
-            <div className="popup-gallery">
-              <div className="main-image-wrap">
+          <div className="property-popup-modern">
+            <div className="popup-images-modern">
+              <div className="main-image-wrap-modern">
                 <img
-                  src={active.images?.[activeImgIdx] ? getFileUrl(active.images[activeImgIdx]) : ""}
-                  className="popup-main-image"
-                  alt="Property"
+                  src={active.images?.[activeImgIdx] ? getFileUrl(active.images[activeImgIdx]) : "https://via.placeholder.com/800x600?text=No+Image"}
+                  alt={active.title}
                 />
                 {active.images?.length > 1 && (
                   <>
-                    <button className="nav-arrow left" onClick={() => setActiveImgIdx((activeImgIdx - 1 + active.images.length) % active.images.length)}>
+                    <button className="nav-arrow-modern left" onClick={() => setActiveImgIdx((activeImgIdx - 1 + active.images.length) % active.images.length)}>
                       <i className="fas fa-chevron-left"></i>
                     </button>
-                    <button className="nav-arrow right" onClick={() => setActiveImgIdx((activeImgIdx + 1) % active.images.length)}>
+                    <button className="nav-arrow-modern right" onClick={() => setActiveImgIdx((activeImgIdx + 1) % active.images.length)}>
                       <i className="fas fa-chevron-right"></i>
                     </button>
                   </>
                 )}
               </div>
-              <div className="thumbnails-row">
+              <div className="thumbnails-modern">
                 {active.images?.map((img, i) => (
                   <img
                     key={i}
                     src={getFileUrl(img)}
-                    className={`thumb-img ${i === activeImgIdx ? 'active' : ''}`}
-                    alt="thumbnail"
+                    className={`thumb-modern ${i === activeImgIdx ? 'active' : ''}`}
+                    alt={`${active.title} thumbnail ${i + 1}`}
                     onClick={() => setActiveImgIdx(i)}
                   />
                 ))}
               </div>
             </div>
 
-            <div className="popup-details">
-              <h2 className="popup-title">{active.title}</h2>
-              <div className="popup-price">Rs {formatPrice(active.price)}</div>
-              <div className="popup-location">
-                <i className="fas fa-map-marker-alt"></i> {active.location}
+            <div className="popup-details-modern">
+              <h2 className="popup-title-modern">{active.title}</h2>
+              <div className="popup-price-modern">Rs {formatPrice(active.price)}</div>
+              <div className="property-location-large" style={{ marginBottom: 20 }}>
+                <i className="fas fa-map-marker-alt"></i> {active.location}, {active.city}
               </div>
 
               <h3>Description</h3>
-              <p className="popup-desc">{active.description}</p>
+              <p className="contact-desc-modern" style={{ color: '#444', fontSize: '1rem' }}>{active.description}</p>
 
-              <div className="popup-features-grid">
-                <div className="p-feature">
+              <div className="popup-meta-grid">
+                <div className="meta-item">
                   <i className="fas fa-home"></i>
                   <span>Type: {active.type}</span>
                 </div>
-                <div className="p-feature">
+                <div className="meta-item">
                   <i className="fas fa-tag"></i>
                   <span>Purpose: For {active.purpose}</span>
                 </div>
-                <div className="p-feature">
+                <div className="meta-item">
                   <i className="fas fa-bed"></i>
                   <span>Bedrooms: {active.bedrooms}</span>
                 </div>
-                <div className="p-feature">
+                <div className="meta-item">
                   <i className="fas fa-bath"></i>
                   <span>Bathrooms: {active.bathrooms}</span>
                 </div>
-                <div className="p-feature">
+                <div className="meta-item">
                   <i className="fas fa-ruler-combined"></i>
-                  <span>Area: {active.area} {active.areaUnit}</span>
+                  <span>Area: {active.area} {active.areaUnit || "sq.ft"}</span>
                 </div>
-                <div className="p-feature">
+                <div className="meta-item">
                   <i className="fas fa-calendar-alt"></i>
                   <span>Added: {new Date(active.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
 
-              <div className="popup-contact-card">
+              <div className="contact-card-modern">
                 <h3>Contact Agent</h3>
-                <div className="agent-number">+92 301 4463416</div>
-                <p className="muted">Call this number to inquire about this property.</p>
-                <div className="popup-actions-row">
-                  <a href={`tel:+923014463416`} className="btn-call-now">
+                <div className="contact-phone-modern">+92 301 4463416</div>
+                <p className="contact-desc-modern">Call this number to inquire about this property or schedule a viewing.</p>
+                <div className="contact-actions-modern">
+                  <a href="tel:+923014463416" className="btn-contact-modern btn-call-modern">
                     <i className="fas fa-phone-alt"></i> CALL NOW
                   </a>
                   <a
                     href={`https://wa.me/923014463416?text=I am interested in ${active.title} (${active.location})`}
-                    className="btn-whatsapp-agent"
+                    className="btn-contact-modern btn-whatsapp-modern"
                     target="_blank"
                     rel="noreferrer"
                   >
-                    <i className="fab fa-whatsapp"></i> CONTACT US
+                    <i className="fab fa-whatsapp"></i> WHATSAPP
                   </a>
                 </div>
               </div>
