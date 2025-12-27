@@ -493,96 +493,125 @@ export default function Home() {
       {/* Modals remain same logic-wise but maybe styled differently due to CSS updates. 
         I'll keep the Modal component structure but ensure it mounts correctly. 
     */}
-      <Modal open={open} title={active?.title || "Property"} onClose={() => setOpen(false)} width={1100}>
+      <Modal open={open} title={active?.title || "Details"} onClose={() => setOpen(false)} width={active?.pdfUrl ? 800 : 1100}>
         {active ? (
-          <div className="property-popup-modern">
-            <div className="popup-images-modern">
-              <div className="main-image-wrap-modern">
-                <img
-                  src={active.images?.[activeImgIdx] ? getFileUrl(active.images[activeImgIdx]) : "https://via.placeholder.com/800x600?text=No+Image"}
-                  alt={active.title}
-                />
-                {active.images?.length > 1 && (
-                  <>
-                    <button className="nav-arrow-modern left" onClick={() => setActiveImgIdx((activeImgIdx - 1 + active.images.length) % active.images.length)}>
-                      <i className="fas fa-chevron-left"></i>
-                    </button>
-                    <button className="nav-arrow-modern right" onClick={() => setActiveImgIdx((activeImgIdx + 1) % active.images.length)}>
-                      <i className="fas fa-chevron-right"></i>
-                    </button>
-                  </>
+          active.pdfUrl ? (
+            /* Map Modal View */
+            <div className="map-popup-modern">
+              <div className="map-popup-image">
+                {active.image ? (
+                  <img src={getFileUrl(active.image)} alt={active.title} />
+                ) : (
+                  <div className="placeholder">No Preview Available</div>
                 )}
               </div>
-              <div className="thumbnails-modern">
-                {active.images?.map((img, i) => (
-                  <img
-                    key={i}
-                    src={getFileUrl(img)}
-                    className={`thumb-modern ${i === activeImgIdx ? 'active' : ''}`}
-                    alt={`${active.title} thumbnail ${i + 1}`}
-                    onClick={() => setActiveImgIdx(i)}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="popup-details-modern">
-              <h2 className="popup-title-modern">{active.title}</h2>
-              <div className="popup-price-modern">Rs {formatPrice(active.price)}</div>
-              <div className="property-location-large" style={{ marginBottom: 20 }}>
-                <i className="fas fa-map-marker-alt"></i> {active.location}, {active.city}
-              </div>
-
-              <h3>Description</h3>
-              <p className="contact-desc-modern" style={{ color: '#444', fontSize: '1rem' }}>{active.description}</p>
-
-              <div className="popup-meta-grid">
-                <div className="meta-item">
-                  <i className="fas fa-home"></i>
-                  <span>Type: {active.type}</span>
-                </div>
-                <div className="meta-item">
-                  <i className="fas fa-tag"></i>
-                  <span>Purpose: For {active.purpose}</span>
-                </div>
-                <div className="meta-item">
-                  <i className="fas fa-bed"></i>
-                  <span>Bedrooms: {active.bedrooms}</span>
-                </div>
-                <div className="meta-item">
-                  <i className="fas fa-bath"></i>
-                  <span>Bathrooms: {active.bathrooms}</span>
-                </div>
-                <div className="meta-item">
-                  <i className="fas fa-ruler-combined"></i>
-                  <span>Area: {active.area} {active.areaUnit || "sq.ft"}</span>
-                </div>
-                <div className="meta-item">
-                  <i className="fas fa-calendar-alt"></i>
-                  <span>Added: {new Date(active.createdAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-
-              <div className="contact-card-modern">
-                <h3>Contact Agent</h3>
-                <div className="contact-phone-modern">+92 301 4463416</div>
-                <p className="contact-desc-modern">Call this number to inquire about this property or schedule a viewing.</p>
-                <div className="contact-actions-modern">
-                  <a href="tel:+923014463416" className="btn-contact-modern btn-call-modern">
-                    <i className="fas fa-phone-alt"></i> CALL NOW
-                  </a>
+              <div className="map-popup-info">
+                <h3>{active.title}</h3>
+                <p>{active.description || "Housing scheme map with complete details."}</p>
+                <div className="map-popup-actions">
                   <a
-                    href={`https://wa.me/923014463416?text=I am interested in ${active.title} (${active.location})`}
-                    className="btn-contact-modern btn-whatsapp-modern"
+                    className="btn btn-primary"
+                    href={getFileUrl(active.pdfUrl)}
                     target="_blank"
                     rel="noreferrer"
+                    download
                   >
-                    <i className="fab fa-whatsapp"></i> WHATSAPP
+                    <i className="fas fa-download"></i> DOWNLOAD PDF MAP
                   </a>
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            /* Property Modal View */
+            <div className="property-popup-modern">
+              <div className="popup-images-modern">
+                <div className="main-image-wrap-modern">
+                  <img
+                    src={active.images?.[activeImgIdx] ? getFileUrl(active.images[activeImgIdx]) : "https://via.placeholder.com/800x600?text=No+Image"}
+                    alt={active.title}
+                  />
+                  {active.images?.length > 1 && (
+                    <>
+                      <button className="nav-arrow-modern left" onClick={() => setActiveImgIdx((activeImgIdx - 1 + active.images.length) % active.images.length)}>
+                        <i className="fas fa-chevron-left"></i>
+                      </button>
+                      <button className="nav-arrow-modern right" onClick={() => setActiveImgIdx((activeImgIdx + 1) % active.images.length)}>
+                        <i className="fas fa-chevron-right"></i>
+                      </button>
+                    </>
+                  )}
+                </div>
+                <div className="thumbnails-modern">
+                  {active.images?.map((img, i) => (
+                    <img
+                      key={i}
+                      src={getFileUrl(img)}
+                      className={`thumb-modern ${i === activeImgIdx ? 'active' : ''}`}
+                      alt={`${active.title} thumbnail ${i + 1}`}
+                      onClick={() => setActiveImgIdx(i)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="popup-details-modern">
+                <h2 className="popup-title-modern">{active.title}</h2>
+                <div className="popup-price-modern">Rs {formatPrice(active.price)}</div>
+                <div className="property-location-large" style={{ marginBottom: 20 }}>
+                  <i className="fas fa-map-marker-alt"></i> {active.location}, {active.city}
+                </div>
+
+                <h3>Description</h3>
+                <p className="contact-desc-modern" style={{ color: '#444', fontSize: '1rem' }}>{active.description}</p>
+
+                <div className="popup-meta-grid">
+                  <div className="meta-item">
+                    <i className="fas fa-home"></i>
+                    <span>Type: {active.type}</span>
+                  </div>
+                  <div className="meta-item">
+                    <i className="fas fa-tag"></i>
+                    <span>Purpose: For {active.purpose}</span>
+                  </div>
+                  <div className="meta-item">
+                    <i className="fas fa-bed"></i>
+                    <span>Bedrooms: {active.bedrooms}</span>
+                  </div>
+                  <div className="meta-item">
+                    <i className="fas fa-bath"></i>
+                    <span>Bathrooms: {active.bathrooms}</span>
+                  </div>
+                  <div className="meta-item">
+                    <i className="fas fa-ruler-combined"></i>
+                    <span>Area: {active.area} {active.areaUnit || "sq.ft"}</span>
+                  </div>
+                  <div className="meta-item">
+                    <i className="fas fa-calendar-alt"></i>
+                    <span>Added: {new Date(active.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                <div className="contact-card-modern">
+                  <h3>Contact Agent</h3>
+                  <div className="contact-phone-modern">+92 301 4463416</div>
+                  <p className="contact-desc-modern">Call this number to inquire about this property or schedule a viewing.</p>
+                  <div className="contact-actions-modern">
+                    <a href="tel:+923014463416" className="btn-contact-modern btn-call-modern">
+                      <i className="fas fa-phone-alt"></i> CALL NOW
+                    </a>
+                    <a
+                      href={`https://wa.me/923014463416?text=I am interested in ${active.title} (${active.location})`}
+                      className="btn-contact-modern btn-whatsapp-modern"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <i className="fab fa-whatsapp"></i> WHATSAPP
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
         ) : null}
       </Modal>
 
