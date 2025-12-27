@@ -16,6 +16,7 @@ export default function Home() {
 
   const [open, setOpen] = React.useState(false);
   const [active, setActive] = React.useState(null);
+  const [activeImgIdx, setActiveImgIdx] = React.useState(0);
 
   const [fav, setFav] = React.useState(() => new Set(JSON.parse(localStorage.getItem(FAV_KEY) || "[]")));
 
@@ -67,6 +68,7 @@ export default function Home() {
 
   function openDetails(item) {
     setActive(item);
+    setActiveImgIdx(0);
     setOpen(true);
   }
 
@@ -272,7 +274,10 @@ export default function Home() {
                   <div className="map-details">
                     <span className="map-size"><i className="fas fa-file-pdf"></i> PDF File</span>
                     <div className="map-actions">
-                      <a className="map-download-btn" href={getFileUrl(m.pdfUrl)} target="_blank" rel="noreferrer">
+                      <button className="map-view-btn" onClick={() => { setActive(m); setOpen(true); }}>
+                        <i className="fas fa-eye"></i> View
+                      </button>
+                      <a className="map-download-btn" href={getFileUrl(m.pdfUrl)} download={`${m.title.replace(/\s+/g, '_')}.pdf`} target="_blank" rel="noreferrer">
                         <i className="fas fa-download"></i> Download
                       </a>
                     </div>
@@ -487,59 +492,93 @@ export default function Home() {
       {/* Modals remain same logic-wise but maybe styled differently due to CSS updates. 
         I'll keep the Modal component structure but ensure it mounts correctly. 
     */}
-      <Modal open={open} title={active?.title || "Property"} onClose={() => setOpen(false)} width={900}>
+      <Modal open={open} title={active?.title || "Property"} onClose={() => setOpen(false)} width={1000}>
         {active ? (
-          <div className="property-modal-content">
-            <div className="property-modal-images">
-              <img src={active.images?.[0] ? getFileUrl(active.images[0]) : ""} className="main-property-image" alt="Main" />
-              <div className="property-images-scroll">
+          <div className="property-popup-grid">
+            <div className="popup-gallery">
+              <div className="main-image-wrap">
+                <img
+                  src={active.images?.[activeImgIdx] ? getFileUrl(active.images[activeImgIdx]) : ""}
+                  className="popup-main-image"
+                  alt="Property"
+                />
+                {active.images?.length > 1 && (
+                  <>
+                    <button className="nav-arrow left" onClick={() => setActiveImgIdx((activeImgIdx - 1 + active.images.length) % active.images.length)}>
+                      <i className="fas fa-chevron-left"></i>
+                    </button>
+                    <button className="nav-arrow right" onClick={() => setActiveImgIdx((activeImgIdx + 1) % active.images.length)}>
+                      <i className="fas fa-chevron-right"></i>
+                    </button>
+                  </>
+                )}
+              </div>
+              <div className="thumbnails-row">
                 {active.images?.map((img, i) => (
-                  <img key={i} src={getFileUrl(img)} className="scroll-image" alt="thumb" />
+                  <img
+                    key={i}
+                    src={getFileUrl(img)}
+                    className={`thumb-img ${i === activeImgIdx ? 'active' : ''}`}
+                    alt="thumbnail"
+                    onClick={() => setActiveImgIdx(i)}
+                  />
                 ))}
               </div>
             </div>
 
-            <div className="property-modal-details">
-              <h2>{active.title}</h2>
-              <div className="property-price-large">PKR {Number(active.price).toLocaleString()}</div>
-              <div className="property-location-large">
+            <div className="popup-details">
+              <h2 className="popup-title">{active.title}</h2>
+              <div className="popup-price">Rs {formatPrice(active.price)}</div>
+              <div className="popup-location">
                 <i className="fas fa-map-marker-alt"></i> {active.location}
               </div>
 
-              <div className="property-details-grid">
-                <div className="detail-item">
-                  <i className="fas fa-bed"></i>
-                  <span>{active.bedrooms} Bedrooms</span>
+              <h3>Description</h3>
+              <p className="popup-desc">{active.description}</p>
+
+              <div className="popup-features-grid">
+                <div className="p-feature">
+                  <i className="fas fa-home"></i>
+                  <span>Type: {active.type}</span>
                 </div>
-                <div className="detail-item">
-                  <i className="fas fa-bath"></i>
-                  <span>{active.bathrooms} Bathrooms</span>
-                </div>
-                <div className="detail-item">
-                  <i className="fas fa-ruler-combined"></i>
-                  <span>{active.area} {active.areaUnit}</span>
-                </div>
-                <div className="detail-item">
+                <div className="p-feature">
                   <i className="fas fa-tag"></i>
-                  <span>{active.purpose}</span>
+                  <span>Purpose: For {active.purpose}</span>
+                </div>
+                <div className="p-feature">
+                  <i className="fas fa-bed"></i>
+                  <span>Bedrooms: {active.bedrooms}</span>
+                </div>
+                <div className="p-feature">
+                  <i className="fas fa-bath"></i>
+                  <span>Bathrooms: {active.bathrooms}</span>
+                </div>
+                <div className="p-feature">
+                  <i className="fas fa-ruler-combined"></i>
+                  <span>Area: {active.area} {active.areaUnit}</span>
+                </div>
+                <div className="p-feature">
+                  <i className="fas fa-calendar-alt"></i>
+                  <span>Added: {new Date(active.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
 
-              <div className="property-description">
-                <h3>Description</h3>
-                <p>{active.description}</p>
-              </div>
-
-              <div className="contact-agent">
+              <div className="popup-contact-card">
                 <h3>Contact Agent</h3>
-                <div className="agent-phone">+92 301 4463416</div>
-                <div className="property-modal-actions">
-                  <a href={`https://wa.me/923014463416?text=I am interested in ${active.title}`} className="btn btn-primary" target="_blank" rel="noreferrer">
-                    <i className="fab fa-whatsapp"></i> WhatsApp
+                <div className="agent-number">+92 301 4463416</div>
+                <p className="muted">Call this number to inquire about this property.</p>
+                <div className="popup-actions-row">
+                  <a href={`tel:+923014463416`} className="btn-call-now">
+                    <i className="fas fa-phone-alt"></i> CALL NOW
                   </a>
-                  <button className="btn btn-outline" onClick={() => openInquiry('inquiry')}>
-                    <i className="fas fa-envelope"></i> Email
-                  </button>
+                  <a
+                    href={`https://wa.me/923014463416?text=I am interested in ${active.title} (${active.location})`}
+                    className="btn-whatsapp-agent"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <i className="fab fa-whatsapp"></i> CONTACT US
+                  </a>
                 </div>
               </div>
             </div>

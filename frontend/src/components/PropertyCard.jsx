@@ -22,37 +22,41 @@ export default function PropertyCard({ item, onOpen, onToggleFav, isFav }) {
         <span className={`property-badge ${badgeClass}`}>{badgeText}</span>
       </div>
       <div className="property-info">
-        <div className="property-price">
-          PKR {formatPrice(item.price)}
-          <span style={{ textTransform: 'capitalize' }}>{item.type}</span>
+        <div className="property-price-row">
+          <span className="price-tag">Rs {formatPrice(item.price)}</span>
         </div>
         <h3 className="property-title">{item.title}</h3>
         <div className="property-location">
           <i className="fas fa-map-marker-alt"></i> {item.location}
         </div>
-        <div className="property-features">
-          <div className="feature">
+
+        <div className="property-features-modern">
+          <div className="feature-modern">
             <i className="fas fa-bed"></i>
             <span>{item.bedrooms || 0} Beds</span>
           </div>
-          <div className="feature">
+          <div className="feature-modern">
             <i className="fas fa-bath"></i>
             <span>{item.bathrooms || 0} Baths</span>
           </div>
-          <div className="feature">
+          <div className="feature-modern">
             <i className="fas fa-ruler-combined"></i>
             <span>{item.area || 0} {item.areaUnit || "sq.ft"}</span>
           </div>
         </div>
-        <div className="property-actions">
-          <button className="btn btn-outline" onClick={() => onOpen(item)}>View Details</button>
-          {/* Contact button can open inquiry directly, or just view details first. 
-                   Design shows Contact. For now, let's make it open details or inquiry.
-                   I'll make it open details for consistency with previous logic, 
-                   or I could pass a specific 'contact' handler. 
-                   Let's stick to onOpen for both or add a semantic difference if needed. 
-                   I'll use onOpen for now as Details modal has actions. */}
-          <button className="btn btn-primary" onClick={() => onOpen(item)}>Contact</button>
+
+        <div className="property-actions-modern">
+          <button className="btn-view-details" onClick={() => onOpen(item)}>
+            VIEW DETAILS
+          </button>
+          <a
+            href={`https://wa.me/923014463416?text=I am interested in ${item.title} (${item.location})`}
+            className="btn-schedule-viewing"
+            target="_blank"
+            rel="noreferrer"
+          >
+            CONTACT
+          </a>
         </div>
       </div>
     </div>

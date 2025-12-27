@@ -27,24 +27,59 @@ export default function AdminLogin() {
 
   return (
     <Layout>
-      <div className="auth">
-        <div className="card auth-card">
-          <h2>Admin Login</h2>
-          <p className="muted">Login to manage properties, maps, certificates and inquiries.</p>
-          <form className="form" onSubmit={submit}>
-            <div className="row">
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="auth-header">
+            <div className="logo-icon">
+              <i className="fas fa-user-shield"></i>
+            </div>
+            <h2>Admin Portal</h2>
+            <p className="muted">Secure access to management dashboard</p>
+          </div>
+          
+          <form className="auth-form" onSubmit={submit}>
+            <div className="form-group-modern">
               <label>Username</label>
-              <input value={form.username} onChange={(e)=>setForm({...form, username:e.target.value})} required />
+              <div className="input-with-icon">
+                <i className="fas fa-user"></i>
+                <input 
+                  type="text"
+                  placeholder="Enter your username"
+                  value={form.username} 
+                  onChange={(e)=>setForm({...form, username:e.target.value})} 
+                  required 
+                />
+              </div>
             </div>
-            <div className="row">
+            
+            <div className="form-group-modern">
               <label>Password</label>
-              <input type="password" value={form.password} onChange={(e)=>setForm({...form, password:e.target.value})} required />
+              <div className="input-with-icon">
+                <i className="fas fa-lock"></i>
+                <input 
+                  type="password" 
+                  placeholder="Enter your password"
+                  value={form.password} 
+                  onChange={(e)=>setForm({...form, password:e.target.value})} 
+                  required 
+                />
+              </div>
             </div>
-            <button className="btn btn-primary" disabled={state.loading}>
-              {state.loading ? "Logging in..." : "Login"}
+            
+            <button className="btn btn-primary btn-block" disabled={state.loading}>
+              {state.loading ? (
+                <><i className="fas fa-spinner fa-spin"></i> Authenticating...</>
+              ) : (
+                <><i className="fas fa-sign-in-alt"></i> Access Dashboard</>
+              )}
             </button>
-            {state.msg ? <div className="hint">{state.msg}</div> : null}
+            
+            {state.msg ? <div className="auth-error">{state.msg}</div> : null}
           </form>
+          
+          <div className="auth-footer">
+            <p>© 2025 RICHMOORESTATE & BUILDERS. All rights reserved.</p>
+          </div>
         </div>
       </div>
     </Layout>

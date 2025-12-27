@@ -36,8 +36,8 @@ export default function Maps() {
               <p className="muted">{m.description}</p>
               <div className="actions">
                 <button className="btn btn-primary" onClick={() => setActive(m)}>View</button>
-                <a className="btn btn-ghost" href={getFileUrl(m.pdfUrl)} target="_blank" rel="noreferrer">
-                  Download
+                <a className="btn btn-ghost" href={getFileUrl(m.pdfUrl)} download={`${m.title.replace(/\s+/g, '_')}.pdf`} target="_blank" rel="noreferrer">
+                  <i className="fas fa-download"></i> Download
                 </a>
               </div>
             </div>
