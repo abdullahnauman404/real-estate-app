@@ -3,6 +3,7 @@ import Layout from "../components/Layout";
 import PropertyCard from "../components/PropertyCard";
 import Modal from "../components/Modal";
 import { api, getFileUrl } from "../lib/api";
+import { formatPrice } from "../lib/utils";
 
 const FAV_KEY = "richmoore_favorites";
 
