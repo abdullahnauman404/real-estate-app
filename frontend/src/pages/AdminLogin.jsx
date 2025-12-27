@@ -31,54 +31,64 @@ export default function AdminLogin() {
         <div className="auth-card">
           <div className="auth-header">
             <div className="logo-icon">
-              <i className="fas fa-user-shield"></i>
+              <i className="fas fa-shield-alt"></i>
             </div>
             <h2>Admin Portal</h2>
-            <p className="muted">Secure access to management dashboard</p>
+            <p>Authorized personnel access only</p>
           </div>
-          
+
           <form className="auth-form" onSubmit={submit}>
             <div className="form-group-modern">
               <label>Username</label>
               <div className="input-with-icon">
                 <i className="fas fa-user"></i>
-                <input 
+                <input
                   type="text"
-                  placeholder="Enter your username"
-                  value={form.username} 
-                  onChange={(e)=>setForm({...form, username:e.target.value})} 
-                  required 
+                  placeholder="Enter username"
+                  value={form.username}
+                  onChange={(e) => setForm({ ...form, username: e.target.value })}
+                  required
+                  autoComplete="username"
                 />
               </div>
             </div>
-            
+
             <div className="form-group-modern">
               <label>Password</label>
               <div className="input-with-icon">
                 <i className="fas fa-lock"></i>
-                <input 
-                  type="password" 
-                  placeholder="Enter your password"
-                  value={form.password} 
-                  onChange={(e)=>setForm({...form, password:e.target.value})} 
-                  required 
+                <input
+                  type="password"
+                  placeholder="Enter password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  required
+                  autoComplete="current-password"
                 />
               </div>
             </div>
-            
-            <button className="btn btn-primary btn-block" disabled={state.loading}>
+
+            <button className="btn-login-modern" disabled={state.loading}>
               {state.loading ? (
-                <><i className="fas fa-spinner fa-spin"></i> Authenticating...</>
+                <><i className="fas fa-circle-notch fa-spin"></i> Authenticating...</>
               ) : (
-                <><i className="fas fa-sign-in-alt"></i> Access Dashboard</>
+                <><i className="fas fa-sign-in-alt"></i> Login to Dashboard</>
               )}
             </button>
-            
-            {state.msg ? <div className="auth-error">{state.msg}</div> : null}
+
+            {state.msg ? (
+              <div className="auth-error">
+                <i className="fas fa-exclamation-circle"></i> {state.msg}
+              </div>
+            ) : null}
+
+            <a href="/" className="back-to-site">
+              <i className="fas fa-arrow-left"></i> Back to Website
+            </a>
           </form>
-          
+
           <div className="auth-footer">
-            <p>© 2025 RICHMOORESTATE & BUILDERS. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} RICHMOORESTATE & BUILDERS</p>
           </div>
         </div>
       </div>

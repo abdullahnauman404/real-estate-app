@@ -118,15 +118,13 @@ export default function Layout({ children, hideFooter = false }) {
                 </button>
               ) : null}
 
-              <button
+              <a
+                href="/#contact"
                 className="btn btn-primary"
-                onClick={() => {
-                  window.location.href = "mailto:richmoorestatebuilders@gmail.com";
-                  closeMobileMenu();
-                }}
+                onClick={closeMobileMenu}
               >
                 <i className="fas fa-question-circle"></i> Quick Inquiry
-              </button>
+              </a>
             </div>
           </div>
 
