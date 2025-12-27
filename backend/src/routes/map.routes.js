@@ -35,13 +35,13 @@ router.post(
       const pdfFile = req.files?.pdf?.[0];
       const coverFile = req.files?.cover?.[0];
 
-      const pdfUrl = pdfFile ? `/uploads/${pdfFile.filename}` : (req.body.pdfUrl || "");
+      const pdfUrl = pdfFile ? pdfFile.path : (req.body.pdfUrl || "");
       if (!pdfUrl) return res.status(400).json({ message: "pdfUrl or pdf file is required" });
 
       const doc = await PdfMap.create({
         ...req.body,
         pdfUrl,
-        image: coverFile ? `/uploads/${coverFile.filename}` : (req.body.image || ""),
+        image: coverFile ? coverFile.path : (req.body.image || ""),
         tags: normalizeTags(req.body.tags),
       });
 
@@ -65,8 +65,8 @@ router.put(
       const coverFile = req.files?.cover?.[0];
 
       const payload = { ...req.body };
-      if (pdfFile) payload.pdfUrl = `/uploads/${pdfFile.filename}`;
-      if (coverFile) payload.image = `/uploads/${coverFile.filename}`;
+      if (pdfFile) payload.pdfUrl = pdfFile.path;
+      if (coverFile) payload.image = coverFile.path;
       if (payload.tags) payload.tags = normalizeTags(payload.tags);
 
       const updated = await PdfMap.findByIdAndUpdate(req.params.id, payload, { new: true });

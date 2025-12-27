@@ -62,11 +62,7 @@ export default function AdminDashboard() {
         <aside className="admin-side">
           <div className="admin-side-head">
             <div className="admin-title">
-              <i className="fas fa-building-columns" />
-              <div>
-                <div className="t1">RICHMOORESTATE</div>
-                <div className="muted">Admin Panel</div>
-              </div>
+              <img src="/logo.jpg" alt="Richmoor Estate" style={{ width: "100%", maxWidth: 180, objectFit: "contain" }} />
             </div>
           </div>
 
@@ -239,7 +235,7 @@ function Stat({ title, value, icon }) {
   );
 }
 
-function EntityTable({ title, rows, columns, onEdit, onDelete, hideEdit=false, renderRight }) {
+function EntityTable({ title, rows, columns, onEdit, onDelete, hideEdit = false, renderRight }) {
   return (
     <div>
       <h2 className="page-title">{title}</h2>
@@ -273,7 +269,7 @@ function EntityTable({ title, rows, columns, onEdit, onDelete, hideEdit=false, r
                 </tr>
               ))}
               {!rows.length ? (
-                <tr><td colSpan={columns.length+1} className="muted center">No data</td></tr>
+                <tr><td colSpan={columns.length + 1} className="muted center">No data</td></tr>
               ) : null}
             </tbody>
           </table>
@@ -308,7 +304,7 @@ function PropertyForm({ initial, onSaved }) {
     setState({ loading: true, msg: "" });
     try {
       const fd = new FormData();
-      Object.entries(form).forEach(([k,v]) => fd.append(k, String(v)));
+      Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
       fd.append("keepImages", JSON.stringify(keepImages));
       for (const f of files) fd.append("images", f);
 
@@ -326,41 +322,41 @@ function PropertyForm({ initial, onSaved }) {
   return (
     <form className="form" onSubmit={submit}>
       <div className="grid2">
-        <Field label="Title" value={form.title} onChange={(v)=>setForm({...form,title:v})} required />
-        <Field label="Location" value={form.location} onChange={(v)=>setForm({...form,location:v})} required />
-        <Field label="City" as="select" value={form.city} onChange={(v)=>setForm({...form,city:v})}>
+        <Field label="Title" value={form.title} onChange={(v) => setForm({ ...form, title: v })} required />
+        <Field label="Location" value={form.location} onChange={(v) => setForm({ ...form, location: v })} required />
+        <Field label="City" as="select" value={form.city} onChange={(v) => setForm({ ...form, city: v })}>
           <option value="lahore">Lahore</option>
           <option value="karachi">Karachi</option>
           <option value="islamabad">Islamabad</option>
           <option value="rawalpindi">Rawalpindi</option>
         </Field>
-        <Field label="Type" as="select" value={form.type} onChange={(v)=>setForm({...form,type:v})}>
+        <Field label="Type" as="select" value={form.type} onChange={(v) => setForm({ ...form, type: v })}>
           <option value="villa">Villa</option>
           <option value="apartment">Apartment</option>
           <option value="house">House</option>
           <option value="plot">Plot</option>
           <option value="commercial">Commercial</option>
         </Field>
-        <Field label="Purpose" as="select" value={form.purpose} onChange={(v)=>setForm({...form,purpose:v})}>
+        <Field label="Purpose" as="select" value={form.purpose} onChange={(v) => setForm({ ...form, purpose: v })}>
           <option value="sale">Sale</option>
           <option value="rent">Rent</option>
         </Field>
-        <Field label="Status" as="select" value={form.status} onChange={(v)=>setForm({...form,status:v})}>
+        <Field label="Status" as="select" value={form.status} onChange={(v) => setForm({ ...form, status: v })}>
           <option value="active">Active</option>
           <option value="sold">Sold</option>
           <option value="rented">Rented</option>
           <option value="inactive">Inactive</option>
         </Field>
-        <Field label="Price (PKR)" type="number" value={form.price} onChange={(v)=>setForm({...form,price:Number(v)})} required />
-        <Field label="Area (sq.ft)" type="number" value={form.area} onChange={(v)=>setForm({...form,area:Number(v)})} />
-        <Field label="Bedrooms" type="number" value={form.bedrooms} onChange={(v)=>setForm({...form,bedrooms:Number(v)})} />
-        <Field label="Bathrooms" type="number" value={form.bathrooms} onChange={(v)=>setForm({...form,bathrooms:Number(v)})} />
-        <Field label="Contact Phone" value={form.contactPhone} onChange={(v)=>setForm({...form,contactPhone:v})} />
+        <Field label="Price (PKR)" type="number" value={form.price} onChange={(v) => setForm({ ...form, price: Number(v) })} required />
+        <Field label="Area (sq.ft)" type="number" value={form.area} onChange={(v) => setForm({ ...form, area: Number(v) })} />
+        <Field label="Bedrooms" type="number" value={form.bedrooms} onChange={(v) => setForm({ ...form, bedrooms: Number(v) })} />
+        <Field label="Bathrooms" type="number" value={form.bathrooms} onChange={(v) => setForm({ ...form, bathrooms: Number(v) })} />
+        <Field label="Contact Phone" value={form.contactPhone} onChange={(v) => setForm({ ...form, contactPhone: v })} />
       </div>
 
       <div className="row">
         <label>Description</label>
-        <textarea rows="5" value={form.description} onChange={(e)=>setForm({...form,description:e.target.value})} required />
+        <textarea rows="5" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
       </div>
 
       {keepImages?.length ? (
@@ -370,7 +366,7 @@ function PropertyForm({ initial, onSaved }) {
             {keepImages.map((img) => (
               <div className="chip" key={img}>
                 <a href={getFileUrl(img)} target="_blank" rel="noreferrer">view</a>
-                <button type="button" className="chip-x" onClick={() => setKeepImages(keepImages.filter((x)=>x!==img))}>×</button>
+                <button type="button" className="chip-x" onClick={() => setKeepImages(keepImages.filter((x) => x !== img))}>×</button>
               </div>
             ))}
           </div>
@@ -380,7 +376,21 @@ function PropertyForm({ initial, onSaved }) {
 
       <div className="row">
         <label>Upload Images</label>
-        <input type="file" multiple accept="image/*" onChange={(e)=>setFiles(Array.from(e.target.files||[]))} />
+        <input type="file" multiple accept="image/*" onChange={(e) => {
+          const newFiles = Array.from(e.target.files || []);
+          setFiles(prev => [...prev, ...newFiles]);
+        }} />
+        <div className="hint">{files.length} new images selected.</div>
+        {files.length ? (
+          <div className="chips">
+            {files.map((f, i) => (
+              <div className="chip" key={i}>
+                <span>{f.name}</span>
+                <button type="button" className="chip-x" onClick={() => setFiles(files.filter((_, idx) => idx !== i))}>×</button>
+              </div>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <div className="actions">
@@ -414,7 +424,7 @@ function MapForm({ initial, onSaved }) {
     setState({ loading: true, msg: "" });
     try {
       const fd = new FormData();
-      Object.entries(form).forEach(([k,v]) => fd.append(k, String(v)));
+      Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
       if (pdfFile) fd.append("pdf", pdfFile);
       if (coverFile) fd.append("cover", coverFile);
 
@@ -430,16 +440,16 @@ function MapForm({ initial, onSaved }) {
 
   return (
     <form className="form" onSubmit={submit}>
-      <Field label="Title" value={form.title} onChange={(v)=>setForm({...form,title:v})} required />
+      <Field label="Title" value={form.title} onChange={(v) => setForm({ ...form, title: v })} required />
       <div className="row">
         <label>Description</label>
-        <textarea rows="4" value={form.description} onChange={(e)=>setForm({...form,description:e.target.value})} />
+        <textarea rows="4" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
       </div>
       <div className="grid2">
-        <Field label="Category" value={form.category} onChange={(v)=>setForm({...form,category:v})} />
-        <Field label="Tags (comma separated)" value={form.tags} onChange={(v)=>setForm({...form,tags:v})} />
-        <Field label="Size (e.g., 2.3 MB)" value={form.size} onChange={(v)=>setForm({...form,size:v})} />
-        <Field label="Status" as="select" value={form.status} onChange={(v)=>setForm({...form,status:v})}>
+        <Field label="Category" value={form.category} onChange={(v) => setForm({ ...form, category: v })} />
+        <Field label="Tags (comma separated)" value={form.tags} onChange={(v) => setForm({ ...form, tags: v })} />
+        <Field label="Size (e.g., 2.3 MB)" value={form.size} onChange={(v) => setForm({ ...form, size: v })} />
+        <Field label="Status" as="select" value={form.status} onChange={(v) => setForm({ ...form, status: v })}>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </Field>
@@ -448,19 +458,19 @@ function MapForm({ initial, onSaved }) {
       <div className="grid2">
         <div className="row">
           <label>PDF file (upload)</label>
-          <input type="file" accept="application/pdf" onChange={(e)=>setPdfFile(e.target.files?.[0] || null)} />
+          <input type="file" accept="application/pdf" onChange={(e) => setPdfFile(e.target.files?.[0] || null)} />
           <div className="hint">OR provide external PDF URL below.</div>
         </div>
         <div className="row">
           <label>Cover image (upload)</label>
-          <input type="file" accept="image/*" onChange={(e)=>setCoverFile(e.target.files?.[0] || null)} />
+          <input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
           <div className="hint">OR provide external cover URL below.</div>
         </div>
       </div>
 
       <div className="grid2">
-        <Field label="External PDF URL (optional)" value={form.pdfUrl} onChange={(v)=>setForm({...form,pdfUrl:v})} />
-        <Field label="External cover URL (optional)" value={form.image} onChange={(v)=>setForm({...form,image:v})} />
+        <Field label="External PDF URL (optional)" value={form.pdfUrl} onChange={(v) => setForm({ ...form, pdfUrl: v })} />
+        <Field label="External cover URL (optional)" value={form.image} onChange={(v) => setForm({ ...form, image: v })} />
       </div>
 
       <div className="actions">
@@ -491,7 +501,7 @@ function CertificateForm({ initial, onSaved }) {
     setState({ loading: true, msg: "" });
     try {
       const fd = new FormData();
-      Object.entries(form).forEach(([k,v]) => fd.append(k, String(v)));
+      Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
       if (imageFile) fd.append("image", imageFile);
 
       if (isEdit) await api.put(`/certificates/${initial._id}`, fd);
@@ -507,10 +517,10 @@ function CertificateForm({ initial, onSaved }) {
   return (
     <form className="form" onSubmit={submit}>
       <div className="grid2">
-        <Field label="Title" value={form.title} onChange={(v)=>setForm({...form,title:v})} required />
-        <Field label="Issuer" value={form.issuer} onChange={(v)=>setForm({...form,issuer:v})} />
-        <Field label="Issue Date" value={form.issueDate} onChange={(v)=>setForm({...form,issueDate:v})} placeholder="e.g., 2024-06-01" />
-        <Field label="Status" as="select" value={form.status} onChange={(v)=>setForm({...form,status:v})}>
+        <Field label="Title" value={form.title} onChange={(v) => setForm({ ...form, title: v })} required />
+        <Field label="Issuer" value={form.issuer} onChange={(v) => setForm({ ...form, issuer: v })} />
+        <Field label="Issue Date" value={form.issueDate} onChange={(v) => setForm({ ...form, issueDate: v })} placeholder="e.g., 2024-06-01" />
+        <Field label="Status" as="select" value={form.status} onChange={(v) => setForm({ ...form, status: v })}>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </Field>
@@ -518,16 +528,16 @@ function CertificateForm({ initial, onSaved }) {
 
       <div className="row">
         <label>Description</label>
-        <textarea rows="4" value={form.description} onChange={(e)=>setForm({...form,description:e.target.value})} />
+        <textarea rows="4" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
       </div>
 
       <div className="grid2">
         <div className="row">
           <label>Upload Image</label>
-          <input type="file" accept="image/*" onChange={(e)=>setImageFile(e.target.files?.[0] || null)} />
+          <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
           <div className="hint">OR provide external image URL.</div>
         </div>
-        <Field label="External Image URL (optional)" value={form.imageUrl} onChange={(v)=>setForm({...form,imageUrl:v})} />
+        <Field label="External Image URL (optional)" value={form.imageUrl} onChange={(v) => setForm({ ...form, imageUrl: v })} />
       </div>
 
       <div className="actions">
@@ -598,19 +608,19 @@ function InquiriesTable({ rows, onChanged }) {
   );
 }
 
-function Field({ label, value, onChange, as="input", required=false, type="text", placeholder, children }) {
+function Field({ label, value, onChange, as = "input", required = false, type = "text", placeholder, children }) {
   return (
     <div className="row">
       <label>{label}{required ? " *" : ""}</label>
       {as === "select" ? (
-        <select value={value} onChange={(e)=>onChange(e.target.value)}>
+        <select value={value} onChange={(e) => onChange(e.target.value)}>
           {children}
         </select>
       ) : (
         <input
           type={type}
           value={value}
-          onChange={(e)=>onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value)}
           required={required}
           placeholder={placeholder}
         />

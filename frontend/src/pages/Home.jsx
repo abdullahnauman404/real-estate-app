@@ -5,44 +5,55 @@ import Modal from "../components/Modal";
 import { api, getFileUrl } from "../lib/api";
 
 const FAV_KEY = "richmoore_favorites";
-const COMP_KEY = "richmoore_compare";
 
 export default function Home() {
   const [items, setItems] = React.useState([]);
-  const [query, setQuery] = React.useState({ q: "", city: "", type: "", purpose: "", sort: "newest" });
-  const [page, setPage] = React.useState(1);
-  const [hasMore, setHasMore] = React.useState(false);
+  const [maps, setMaps] = React.useState([]);
+  const [certs, setCerts] = React.useState([]);
+
+  const [query, setQuery] = React.useState({ q: "", city: "", type: "", purpose: "", sort: "newest", priceRange: "" });
   const [loading, setLoading] = React.useState(false);
 
   const [open, setOpen] = React.useState(false);
   const [active, setActive] = React.useState(null);
 
   const [fav, setFav] = React.useState(() => new Set(JSON.parse(localStorage.getItem(FAV_KEY) || "[]")));
-  const [compare, setCompare] = React.useState(() => new Set(JSON.parse(localStorage.getItem(COMP_KEY) || "[]")));
 
   const [inquiryOpen, setInquiryOpen] = React.useState(false);
   const [inquiryMode, setInquiryMode] = React.useState("inquiry");
 
   React.useEffect(() => {
-    load(1, true);
+    loadProperties();
+    loadExtras();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.city, query.type, query.purpose, query.sort]);
+  }, [query.city, query.type, query.purpose, query.sort, query.priceRange]);
 
-  async function load(nextPage, replace = false) {
+  async function loadProperties() {
     setLoading(true);
     try {
-      const res = await api.get("/properties", { params: { ...query, page: nextPage, limit: 9, status: "active" } });
-      setHasMore(Boolean(res.data.hasMore));
-      setPage(res.data.page);
-      setItems(replace ? res.data.items : [...items, ...res.data.items]);
+      const res = await api.get("/properties", { params: { ...query, page: 1, limit: 12, status: "active" } });
+      setItems(res.data.items || []);
     } finally {
       setLoading(false);
     }
   }
 
+  async function loadExtras() {
+    try {
+      const [m, c] = await Promise.all([
+        api.get("/maps", { params: { limit: 8, status: "active" } }),
+        api.get("/certificates", { params: { limit: 8, status: "active" } })
+      ]);
+      setMaps(m.data.items || []);
+      setCerts(c.data.items || []);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   function onSearch(e) {
-    e.preventDefault();
-    load(1, true);
+    if (e) e.preventDefault();
+    loadProperties();
   }
 
   function toggleFav(item) {
@@ -52,18 +63,6 @@ export default function Home() {
     else next.add(id);
     setFav(next);
     localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(next)));
-  }
-
-  function toggleCompare(item) {
-    const next = new Set(compare);
-    const id = item._id;
-    if (next.has(id)) next.delete(id);
-    else {
-      if (next.size >= 3) return alert("You can compare max 3 properties.");
-      next.add(id);
-    }
-    setCompare(next);
-    localStorage.setItem(COMP_KEY, JSON.stringify(Array.from(next)));
   }
 
   function openDetails(item) {
@@ -76,105 +75,472 @@ export default function Home() {
     setInquiryOpen(true);
   }
 
+  // Helper handling specific filter button clicks
+  const handleFilterClick = (type, value) => {
+    let newQuery = { ...query };
+    if (type === 'all') {
+      newQuery = { ...newQuery, purpose: "", type: "" };
+    } else if (type === 'sale' || type === 'rent') {
+      newQuery = { ...newQuery, purpose: type };
+    } else {
+      newQuery = { ...newQuery, type: value };
+    }
+    setQuery(newQuery);
+  };
+
   return (
     <Layout>
+      {/* Hero Section */}
       <section className="hero">
-        <div className="hero-inner">
-          <h1>Find your next property in Pakistan</h1>
-          <p>Search verified listings, view details, and send inquiry in minutes.</p>
+        <div className="container">
+          <div className="hero-content">
+            <h1 className="hero-title">Find Your <span className="highlight">Dream Property</span> in Pakistan</h1>
+            <p className="hero-subtitle">Premium residential and commercial properties across Lahore, Islamabad, Karachi, and other major cities</p>
 
-          <form className="searchbar" onSubmit={onSearch}>
-            <input
-              placeholder="Search by title, location, keywords..."
-              value={query.q}
-              onChange={(e) => setQuery({ ...query, q: e.target.value })}
-            />
-            <select value={query.city} onChange={(e) => setQuery({ ...query, city: e.target.value })}>
-              <option value="">All Cities</option>
-              <option value="lahore">Lahore</option>
-              <option value="karachi">Karachi</option>
-              <option value="islamabad">Islamabad</option>
-              <option value="rawalpindi">Rawalpindi</option>
-            </select>
-            <select value={query.type} onChange={(e) => setQuery({ ...query, type: e.target.value })}>
-              <option value="">All Types</option>
-              <option value="villa">Villa</option>
-              <option value="apartment">Apartment</option>
-              <option value="house">House</option>
-              <option value="plot">Plot</option>
-              <option value="commercial">Commercial</option>
-            </select>
-            <select value={query.purpose} onChange={(e) => setQuery({ ...query, purpose: e.target.value })}>
-              <option value="">Sale + Rent</option>
-              <option value="sale">Sale</option>
-              <option value="rent">Rent</option>
-            </select>
-            <select value={query.sort} onChange={(e) => setQuery({ ...query, sort: e.target.value })}>
-              <option value="newest">Newest</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-            </select>
-            <button className="btn btn-primary" type="submit">
-              <i className="fas fa-magnifying-glass" /> Search
-            </button>
-          </form>
+            {/* Real Search Form */}
+            <div className="search-form-real">
+              <div className="search-row">
+                <div className="search-group">
+                  <label><i className="fas fa-map-marker-alt"></i> City</label>
+                  <select id="searchCity" value={query.city} onChange={(e) => setQuery({ ...query, city: e.target.value })}>
+                    <option value="">Select City</option>
+                    <option value="lahore">Lahore</option>
+                    <option value="islamabad">Islamabad</option>
+                    <option value="karachi">Karachi</option>
+                    <option value="rawalpindi">Rawalpindi</option>
+                    <option value="faisalabad">Faisalabad</option>
+                  </select>
+                </div>
 
-          {compare.size ? <CompareBar count={compare.size} onClear={() => { setCompare(new Set()); localStorage.removeItem(COMP_KEY); }} /> : null}
+                <div className="search-group">
+                  <label><i className="fas fa-home"></i> Property Type</label>
+                  <select id="searchPropertyType" value={query.type} onChange={(e) => setQuery({ ...query, type: e.target.value })}>
+                    <option value="">All Types</option>
+                    <option value="house">House</option>
+                    <option value="apartment">Apartment</option>
+                    <option value="villa">Villa</option>
+                    <option value="plot">Plot</option>
+                    <option value="commercial">Commercial</option>
+                  </select>
+                </div>
+
+                <div className="search-group">
+                  <label><i className="fas fa-tag"></i> Purpose</label>
+                  <select id="searchPurpose" value={query.purpose} onChange={(e) => setQuery({ ...query, purpose: e.target.value })}>
+                    <option value="">All</option>
+                    <option value="sale">For Sale</option>
+                    <option value="rent">For Rent</option>
+                  </select>
+                </div>
+
+                <div className="search-group">
+                  <label><i className="fas fa-money-bill-wave"></i> Price Range (Rs)</label>
+                  <select id="searchPrice" value={query.priceRange} onChange={(e) => setQuery({ ...query, priceRange: e.target.value })}>
+                    <option value="">Any Price</option>
+                    <option value="low">Under 1 Crore</option>
+                    <option value="mid">1 Crore - 5 Crore</option>
+                    <option value="high">Above 5 Crore</option>
+                  </select>
+                </div>
+
+                <button className="btn btn-primary search-btn" id="searchBtn" onClick={onSearch}>
+                  <i className="fas fa-search"></i> Search
+                </button>
+              </div>
+            </div>
+
+            <div className="hero-stats">
+              <div className="stat">
+                <h3 id="totalPropertiesCount">{items.length > 5 ? items.length : "100+"}</h3>
+                <p>Properties Listed</p>
+              </div>
+              <div className="stat">
+                <h3>15+</h3>
+                <p>Years Experience</p>
+              </div>
+              <div className="stat">
+                <h3 id="soldPropertiesCount">500+</h3>
+                <p>Properties Sold</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="grid">
-        {items.map((p) => (
-          <PropertyCard
-            key={p._id}
-            item={p}
-            onOpen={openDetails}
-            onToggleFav={toggleFav}
-            isFav={fav.has(p._id)}
-            onToggleCompare={toggleCompare}
-            isCompared={compare.has(p._id)}
-          />
-        ))}
-      </section>
-
-      <div className="center mt-24">
-        {hasMore ? (
-          <button className="btn btn-ghost" disabled={loading} onClick={() => load(page + 1, false)}>
-            {loading ? "Loading..." : "Load more"}
-          </button>
-        ) : (
-          <div className="muted">{loading ? "Loading..." : "No more properties."}</div>
-        )}
+      {/* Quick Stats */}
+      <div className="quick-stats">
+        <div className="container">
+          <div className="stats-grid">
+            <div className="stat-item">
+              <i className="fas fa-home"></i>
+              <div>
+                <h3>Verified</h3>
+                <p>All Properties Verified</p>
+              </div>
+            </div>
+            <div className="stat-item">
+              <i className="fas fa-file-contract"></i>
+              <div>
+                <h3>Legal</h3>
+                <p>Complete Documentation</p>
+              </div>
+            </div>
+            <div className="stat-item">
+              <i className="fas fa-handshake"></i>
+              <div>
+                <h3>Trusted</h3>
+                <p>500+ Happy Clients</p>
+              </div>
+            </div>
+            <div className="stat-item">
+              <i className="fas fa-clock"></i>
+              <div>
+                <h3>24/7</h3>
+                <p>Customer Support</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <Modal open={open} title={active?.title || "Property"} onClose={() => setOpen(false)} width={980}>
-        {active ? (
-          <div className="details">
-            <Gallery images={active.images || []} />
-            <div className="details-right">
-              <div className="details-price">PKR {Number(active.price || 0).toLocaleString("en-PK")}</div>
-              <div className="muted"><i className="fas fa-location-dot" /> {active.location}</div>
+      {/* Properties Section */}
+      <section className="properties-section" id="properties">
+        <div className="container">
+          <div className="section-header">
+            <h2>Featured <span className="highlight">Properties</span></h2>
+            <p>Premium properties available for sale and rent</p>
+          </div>
 
-              <div className="details-meta">
-                <span><i className="fas fa-bed" /> {active.bedrooms || 0} Beds</span>
-                <span><i className="fas fa-bath" /> {active.bathrooms || 0} Baths</span>
-                <span><i className="fas fa-ruler-combined" /> {active.area || 0} {active.areaUnit || "sq.ft"}</span>
+          {/* Property Filters */}
+          <div className="property-filters">
+            <div className="filter-tabs">
+              <button className={`filter-tab ${!query.purpose && !query.type ? "active" : ""}`} onClick={() => handleFilterClick('all')}>All Properties</button>
+              <button className={`filter-tab ${query.purpose === 'sale' ? "active" : ""}`} onClick={() => handleFilterClick('sale')}>For Sale</button>
+              <button className={`filter-tab ${query.purpose === 'rent' ? "active" : ""}`} onClick={() => handleFilterClick('rent')}>For Rent</button>
+              <button className={`filter-tab ${query.type === 'plot' ? "active" : ""}`} onClick={() => handleFilterClick('plot', 'plot')}>Plots</button>
+              <button className={`filter-tab ${query.type === 'commercial' ? "active" : ""}`} onClick={() => handleFilterClick('commercial', 'commercial')}>Commercial</button>
+            </div>
+
+            <div className="sort-options">
+              <select id="sortProperties" value={query.sort} onChange={(e) => setQuery({ ...query, sort: e.target.value })}>
+                <option value="newest">Newest First</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Properties Grid */}
+          <div className="properties-grid" id="propertiesGrid">
+            {items.map((p) => (
+              <PropertyCard
+                key={p._id}
+                item={p}
+                onOpen={openDetails}
+                onToggleFav={toggleFav}
+                isFav={fav.has(p._id)}
+              />
+            ))}
+          </div>
+
+          {!items.length && !loading && <div className="center muted" style={{ textAlign: "center", padding: 40, width: "100%" }}>No properties found.</div>}
+
+          <div className="load-more-container">
+            <button className="btn btn-outline" id="loadMoreBtn" onClick={() => loadProperties()}>Load More Properties</button>
+          </div>
+        </div>
+      </section>
+
+      {/* Maps Section */}
+      <section className="maps-section" id="maps">
+        <div className="container">
+          <div className="section-header">
+            <h2>Property <span className="highlight">Maps</span></h2>
+            <p>Download detailed PDF maps of housing schemes and projects</p>
+          </div>
+
+          <div className="maps-grid" id="mapsGrid">
+            {maps.length ? maps.map(m => (
+              <div key={m._id} className="map-card">
+                <div className="map-image-container">
+                  {m.image ? <img src={getFileUrl(m.image)} className="map-image" alt={m.title} /> : <div className="placeholder">Map</div>}
+                  <span className="map-badge">New</span>
+                </div>
+                <div className="map-info">
+                  <h3 className="map-title">{m.title}</h3>
+                  <p className="map-description">{m.description || "Housing scheme map with complete details."}</p>
+                  <div className="map-details">
+                    <span className="map-size"><i className="fas fa-file-pdf"></i> PDF File</span>
+                    <div className="map-actions">
+                      <a className="map-download-btn" href={getFileUrl(m.pdfUrl)} target="_blank" rel="noreferrer">
+                        <i className="fas fa-download"></i> Download
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <div className="empty-state">
+                <i className="fas fa-map"></i>
+                <h3>No Maps Available</h3>
+                <p>Maps will be displayed here once added by admin</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Certificates Section */}
+      <section className="certificates-section" id="certificates">
+        <div className="container">
+          <div className="section-header">
+            <h2>Our <span className="highlight">Certificates</span></h2>
+            <p>Official certifications and accreditations</p>
+          </div>
+
+          <div className="certificates-grid" id="certificatesGrid">
+            {certs.length ? certs.map(c => (
+              <div key={c._id} className="certificate-card">
+                <img src={getFileUrl(c.imageUrl)} className="certificate-image" alt={c.title} />
+                <div className="certificate-info">
+                  <h3 className="certificate-title">{c.title}</h3>
+                  <p className="certificate-description">{c.description || "Official certification."}</p>
+                  <span className="certificate-status">Verified</span>
+                </div>
+              </div>
+            )) : (
+              <div className="empty-state">
+                <i className="fas fa-award"></i>
+                <h3>No Certificates Available</h3>
+                <p>Certificates will be displayed here once added by admin</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section className="services-section" id="services">
+        <div className="container">
+          <div className="section-header">
+            <h2>Our <span className="highlight">Services</span></h2>
+            <p>Complete real estate solutions for your needs</p>
+          </div>
+
+          <div className="services-grid">
+            <div className="service-card">
+              <div className="service-icon">
+                <i className="fas fa-home"></i>
+              </div>
+              <h3>Property Buying</h3>
+              <p>Find your dream home with our extensive collection of verified residential properties.</p>
+            </div>
+
+            <div className="service-card">
+              <div className="service-icon">
+                <i className="fas fa-key"></i>
+              </div>
+              <h3>Property Renting</h3>
+              <p>Rental properties with complete documentation and legal verification.</p>
+            </div>
+
+            <div className="service-card">
+              <div className="service-icon">
+                <i class="fas fa-tasks"></i>
+              </div>
+              <h3>Property Management</h3>
+              <p>Complete property management services including maintenance, tenant screening, and rent collection.</p>
+            </div>
+
+            <div className="service-card">
+              <div className="service-icon">
+                <i className="fas fa-building"></i>
+              </div>
+              <h3>Commercial Properties</h3>
+              <p>Office spaces, shops, and commercial buildings for business expansion.</p>
+            </div>
+
+            <div className="service-card">
+              <div className="service-icon">
+                <i className="fas fa-file-contract"></i>
+              </div>
+              <h3>Legal Services</h3>
+              <p>Complete legal documentation and property transfer assistance.</p>
+            </div>
+
+            <div className="service-card">
+              <div className="service-icon">
+                <i className="fas fa-search-dollar"></i>
+              </div>
+              <h3>Property Valuation</h3>
+              <p>Accurate market valuation and investment consultancy.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section className="about-section" id="about">
+        <div className="container">
+          <div className="about-content">
+            <div className="about-text">
+              <h2>About <span className="highlight">RICHMOORESTATE</span></h2>
+              <p>Established in 2008, RICHMOORESTATE & BUILDERS is a premier real estate agency in Pakistan with over 15 years of experience in property dealing. We specialize in residential and commercial properties across major cities.</p>
+
+              <div className="about-features">
+                <div className="feature">
+                  <i className="fas fa-check-circle"></i>
+                  <span>Verified Properties Only</span>
+                </div>
+                <div className="feature">
+                  <i className="fas fa-check-circle"></i>
+                  <span>Complete Legal Documentation</span>
+                </div>
+                <div className="feature">
+                  <i className="fas fa-check-circle"></i>
+                  <span>Market Competitive Prices</span>
+                </div>
+                <div className="feature">
+                  <i className="fas fa-check-circle"></i>
+                  <span>24/7 Customer Support</span>
+                </div>
               </div>
 
-              <p className="details-desc">{active.description}</p>
+              <div className="about-stats">
+                <div className="stat">
+                  <h3>15+</h3>
+                  <p>Years Experience</p>
+                </div>
+                <div className="stat">
+                  <h3>500+</h3>
+                  <p>Properties Sold</p>
+                </div>
+                <div className="stat">
+                  <h3>300+</h3>
+                  <p>Happy Clients</p>
+                </div>
+                <div className="stat">
+                  <h3>50+</h3>
+                  <p>Prime Locations</p>
+                </div>
+              </div>
+            </div>
 
-              <div className="details-actions">
-                <button className="btn btn-primary" onClick={() => openInquiry("inquiry")}>
-                  Send Inquiry
-                </button>
-                <button className="btn btn-ghost" onClick={() => openInquiry("schedule_viewing")}>
-                  Schedule Viewing
-                </button>
-                {active.contactPhone ? (
-                  <a className="btn btn-ghost" href={`tel:${active.contactPhone}`}>
-                    Call Now
+            <div className="about-image">
+              <img src="/logo.jpg" alt="Our Office" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="contact-section" id="contact">
+        <div className="container">
+          <div className="section-header">
+            <h2>Contact <span className="highlight">Us</span></h2>
+            <p>Get in touch with our expert property consultants</p>
+          </div>
+
+          <div className="contact-content">
+            <div className="contact-info">
+              <div className="contact-item">
+                <i className="fas fa-map-marker-alt"></i>
+                <div>
+                  <h3>Office Address</h3>
+                  <p>Office # 75 CCA, 1st Floor, Block DD<br />Phase 4, DHA Lahore, Pakistan</p>
+                </div>
+              </div>
+
+              <div className="contact-item">
+                <i className="fas fa-phone-alt"></i>
+                <div>
+                  <h3>Phone Numbers</h3>
+                  <p>+92 301 4463416 (Primary)<br />+92 423 5694178 (Office)</p>
+                </div>
+              </div>
+
+              <div className="contact-item">
+                <i className="fas fa-envelope"></i>
+                <div>
+                  <h3>Email Address</h3>
+                  <p>richmoorestatebuilders@gmail.com</p>
+                </div>
+              </div>
+
+              <div className="contact-item">
+                <i className="fas fa-clock"></i>
+                <div>
+                  <h3>Working Hours</h3>
+                  <p>Monday - Saturday: 9:30 AM - 7:00 PM<br />Sunday: 10:00 AM - 5:00 PM</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="contact-form">
+              <h3>Send Inquiry</h3>
+              <ContactForm />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Modals remain same logic-wise but maybe styled differently due to CSS updates. 
+        I'll keep the Modal component structure but ensure it mounts correctly. 
+    */}
+      <Modal open={open} title={active?.title || "Property"} onClose={() => setOpen(false)} width={900}>
+        {active ? (
+          <div className="property-modal-content">
+            <div className="property-modal-images">
+              <img src={active.images?.[0] ? getFileUrl(active.images[0]) : ""} className="main-property-image" alt="Main" />
+              <div className="property-images-scroll">
+                {active.images?.map((img, i) => (
+                  <img key={i} src={getFileUrl(img)} className="scroll-image" alt="thumb" />
+                ))}
+              </div>
+            </div>
+
+            <div className="property-modal-details">
+              <h2>{active.title}</h2>
+              <div className="property-price-large">PKR {Number(active.price).toLocaleString()}</div>
+              <div className="property-location-large">
+                <i className="fas fa-map-marker-alt"></i> {active.location}
+              </div>
+
+              <div className="property-details-grid">
+                <div className="detail-item">
+                  <i className="fas fa-bed"></i>
+                  <span>{active.bedrooms} Bedrooms</span>
+                </div>
+                <div className="detail-item">
+                  <i className="fas fa-bath"></i>
+                  <span>{active.bathrooms} Bathrooms</span>
+                </div>
+                <div className="detail-item">
+                  <i className="fas fa-ruler-combined"></i>
+                  <span>{active.area} {active.areaUnit}</span>
+                </div>
+                <div className="detail-item">
+                  <i className="fas fa-tag"></i>
+                  <span>{active.purpose}</span>
+                </div>
+              </div>
+
+              <div className="property-description">
+                <h3>Description</h3>
+                <p>{active.description}</p>
+              </div>
+
+              <div className="contact-agent">
+                <h3>Contact Agent</h3>
+                <div className="agent-phone">+92 301 4463416</div>
+                <div className="property-modal-actions">
+                  <a href={`https://wa.me/923014463416?text=I am interested in ${active.title}`} className="btn btn-primary" target="_blank" rel="noreferrer">
+                    <i className="fab fa-whatsapp"></i> WhatsApp
                   </a>
-                ) : null}
+                  <button className="btn btn-outline" onClick={() => openInquiry('inquiry')}>
+                    <i className="fas fa-envelope"></i> Email
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -191,100 +557,109 @@ export default function Home() {
   );
 }
 
-function Gallery({ images }) {
-  const [i, setI] = React.useState(0);
-  const safe = (images || []).filter(Boolean);
-  if (!safe.length) return <div className="gallery empty">No images</div>;
-  const url = getFileUrl(safe[i]);
+function ContactForm() {
+  const [form, setForm] = React.useState({ name: "", phone: "", email: "", type: "", message: "", propertyReference: "" });
+  const [loading, setLoading] = React.useState(false);
+  const [msg, setMsg] = React.useState("");
+
+  async function submit(e) {
+    e.preventDefault();
+    setLoading(true);
+    setMsg("");
+    try {
+      await api.post("/inquiries", { ...form, source: "contact_page_new" });
+      setMsg("Thank you! Your inquiry has been sent.");
+      setForm({ name: "", phone: "", email: "", type: "", message: "", propertyReference: "" });
+    } catch {
+      setMsg("Error sending message. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <div className="gallery">
-      <img src={url} alt="Property" />
-      <div className="thumbs">
-        {safe.map((src, idx) => (
-          <button
-            key={src + idx}
-            className={`thumb ${idx === i ? "active" : ""}`}
-            onClick={() => setI(idx)}
-            type="button"
-          >
-            <img src={getFileUrl(src)} alt="thumb" />
-          </button>
-        ))}
+    <form id="inquiryForm" onSubmit={submit}>
+      <div className="form-group">
+        <input type="text" placeholder="Your Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
       </div>
-    </div>
-  );
-}
-
-function CompareBar({ count, onClear }) {
-  return (
-    <div className="comparebar">
-      <div><i className="fas fa-code-compare" /> Compared: {count} (max 3)</div>
-      <button className="btn btn-ghost" onClick={onClear}>Clear</button>
-    </div>
-  );
+      <div className="form-group">
+        <input type="tel" placeholder="Phone Number" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required />
+      </div>
+      <div className="form-group">
+        <input type="email" placeholder="Email Address" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+      </div>
+      <div className="form-group">
+        <select required value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
+          <option value="">Select Inquiry Type</option>
+          <option value="property_viewing">Property Viewing</option>
+          <option value="property_information">Property Information</option>
+          <option value="price_negotiation">Price Negotiation</option>
+          <option value="legal_assistance">Legal Assistance</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <input type="text" placeholder="Property Reference (if any)" value={form.propertyReference} onChange={e => setForm({ ...form, propertyReference: e.target.value })} />
+      </div>
+      <div className="form-group">
+        <textarea placeholder="Your Message" rows="4" required value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}></textarea>
+      </div>
+      <button type="submit" className="btn btn-primary" disabled={loading}>
+        <i className="fas fa-paper-plane"></i> {loading ? "Sending..." : "Send Inquiry"}
+      </button>
+      {msg && <p style={{ color: 'green', marginTop: 10 }}>{msg}</p>}
+    </form>
+  )
 }
 
 function InquiryModal({ open, onClose, property, mode }) {
+  // Reusing the modal logic but ensuring styles match
+  // For simplicity, we can keep the previous InquiryModal implementation but it needs to be compatible with new CSS classes like .modal-content
+  // The Modal component handles the outer shell.
+
   const [form, setForm] = React.useState({ name: "", email: "", phone: "", message: "" });
-  const [state, setState] = React.useState({ loading: false, msg: "" });
+  const [loading, setLoading] = React.useState(false);
+  const [msg, setMsg] = React.useState("");
 
   React.useEffect(() => {
     if (open) {
-      setForm((f) => ({
-        ...f,
-        message: mode === "schedule_viewing"
-          ? "I want to schedule a viewing. Please share available slots."
-          : "I am interested in this property. Please contact me.",
-      }));
-      setState({ loading: false, msg: "" });
+      setForm({
+        name: "", email: "", phone: "",
+        message: mode === "schedule_viewing" ? "I want to schedule a viewing." : "I am interested in this property."
+      });
+      setMsg("");
     }
   }, [open, mode]);
 
   async function submit(e) {
     e.preventDefault();
-    setState({ loading: true, msg: "" });
+    setLoading(true);
     try {
-      await api.post("/inquiries", {
-        ...form,
-        propertyId: property?._id,
-        propertyTitle: property?.title,
-        source: mode === "schedule_viewing" ? "schedule_viewing" : "inquiry",
-      });
-      setState({ loading: false, msg: "Submitted. Our team will contact you soon." });
-      setForm({ name: "", email: "", phone: "", message: "" });
-    } catch (err) {
-      setState({ loading: false, msg: err?.response?.data?.message || "Could not submit." });
+      await api.post("/inquiries", { ...form, propertyId: property?._id, source: mode });
+      setMsg("Sent successfully.");
+      setTimeout(onClose, 2000);
+    } catch {
+      setMsg("Error sending.");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <Modal open={open} title={mode === "schedule_viewing" ? "Schedule Viewing" : "Send Inquiry"} onClose={onClose} width={680}>
-      <form className="form" onSubmit={submit}>
-        <div className="row">
-          <label>Name</label>
-          <input value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required />
+    <Modal open={open} title={mode === "schedule_viewing" ? "Schedule Viewing" : "Quick Inquiry"} onClose={onClose}>
+      <form onSubmit={submit} className="contact-form" style={{ padding: 0, boxShadow: 'none' }}>
+        <div className="form-group">
+          <input placeholder="Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
         </div>
-        <div className="row">
-          <label>Email</label>
-          <input type="email" value={form.email} onChange={(e)=>setForm({...form, email:e.target.value})} />
+        <div className="form-group">
+          <input placeholder="Phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required />
         </div>
-        <div className="row">
-          <label>Phone</label>
-          <input value={form.phone} onChange={(e)=>setForm({...form, phone:e.target.value})} required />
+        <div className="form-group">
+          <textarea placeholder="Message" value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} required />
         </div>
-        <div className="row">
-          <label>Message</label>
-          <textarea rows="4" value={form.message} onChange={(e)=>setForm({...form, message:e.target.value})} required />
-        </div>
-        <div className="actions">
-          <button className="btn btn-primary" disabled={state.loading}>
-            {state.loading ? "Submitting..." : "Submit"}
-          </button>
-          <button className="btn btn-ghost" type="button" onClick={onClose}>Close</button>
-        </div>
-        {state.msg ? <div className="hint">{state.msg}</div> : null}
+        <button className="btn btn-primary" disabled={loading}>{loading ? "Sending..." : "Submit"}</button>
+        {msg && <p>{msg}</p>}
       </form>
     </Modal>
-  );
+  )
 }
