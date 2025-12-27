@@ -58,14 +58,10 @@ export default function AdminDashboard() {
   if (!token) return <Navigate to="/admin" replace />;
 
   return (
-    <Layout>
+    <Layout hideFooter={true}>
       <div className="admin">
         <aside className="admin-side">
-          <div className="admin-side-head">
-            <div className="admin-title">
-              <img src="/logo.jpg" alt="Richmoor Estate" style={{ width: "100%", maxWidth: 180, objectFit: "contain" }} />
-            </div>
-          </div>
+          {/* Admin Header / Logo removed as requested */}
 
           <div className="admin-menu">
             {sections.map((s) => (

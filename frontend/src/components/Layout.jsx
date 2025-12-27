@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { getToken, setToken } from "../lib/auth";
 
-export default function Layout({ children }) {
+export default function Layout({ children, hideFooter = false }) {
   const nav = useNavigate();
   const location = useLocation();
   const token = getToken();
@@ -144,76 +144,78 @@ export default function Layout({ children }) {
       <main>{children}</main>
 
       {/* Footer */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-col">
-              <div className="footer-logo">
-                <img src="/logo.jpg" alt="Richmoor Estate" style={{ height: 60, borderRadius: 5, marginBottom: 15 }} />
-                <div>
-                  <h3>RICHMOORESTATE</h3>
-                  <p>Premium Property Dealers</p>
+      {!hideFooter && (
+        <footer className="footer">
+          <div className="container">
+            <div className="footer-content">
+              <div className="footer-col">
+                <div className="footer-logo">
+                  <img src="/logo.jpg" alt="Richmoor Estate" style={{ height: 60, borderRadius: 5, marginBottom: 15 }} />
+                  <div>
+                    <h3>RICHMOORESTATE</h3>
+                    <p>Premium Property Dealers</p>
+                  </div>
+                </div>
+                <p>Your trusted partner for premium real estate solutions in Pakistan since 2008.</p>
+                <div className="social-links">
+                  <a href="#"><i className="fab fa-facebook-f"></i></a>
+                  <a href="#"><i className="fab fa-twitter"></i></a>
+                  <a href="#"><i className="fab fa-instagram"></i></a>
+                  <a href="#"><i className="fab fa-linkedin-in"></i></a>
                 </div>
               </div>
-              <p>Your trusted partner for premium real estate solutions in Pakistan since 2008.</p>
-              <div className="social-links">
-                <a href="#"><i className="fab fa-facebook-f"></i></a>
-                <a href="#"><i className="fab fa-twitter"></i></a>
-                <a href="#"><i className="fab fa-instagram"></i></a>
-                <a href="#"><i className="fab fa-linkedin-in"></i></a>
+
+              <div className="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                  <li><a href="/">Home</a></li>
+                  <li><a href="/#properties">Properties</a></li>
+                  <li><a href="/#maps">Maps</a></li>
+                  <li><a href="/#certificates">Certificates</a></li>
+                  {/* <li><a href="/#services">Services</a></li> */}
+                  {/* <li><a href="/#about">About Us</a></li> */}
+                  <li><a href="/#contact">Contact</a></li>
+                </ul>
+              </div>
+
+              <div className="footer-col">
+                <h4>Property Cities</h4>
+                <ul>
+                  <li><a href="/?city=lahore">Lahore Properties</a></li>
+                  <li><a href="/?city=islamabad">Islamabad Properties</a></li>
+                  <li><a href="/?city=karachi">Karachi Properties</a></li>
+                  <li><a href="/?city=rawalpindi">Rawalpindi Properties</a></li>
+                  <li><a href="/?city=faisalabad">Faisalabad Properties</a></li>
+                </ul>
+              </div>
+
+              <div className="footer-col">
+                <h4>Newsletter</h4>
+                <p>Subscribe for new property updates</p>
+                <NewsletterForm />
               </div>
             </div>
 
-            <div className="footer-col">
-              <h4>Quick Links</h4>
-              <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/#properties">Properties</a></li>
-                <li><a href="/#maps">Maps</a></li>
-                <li><a href="/#certificates">Certificates</a></li>
-                {/* <li><a href="/#services">Services</a></li> */}
-                {/* <li><a href="/#about">About Us</a></li> */}
-                <li><a href="/#contact">Contact</a></li>
-              </ul>
-            </div>
-
-            <div className="footer-col">
-              <h4>Property Cities</h4>
-              <ul>
-                <li><a href="/?city=lahore">Lahore Properties</a></li>
-                <li><a href="/?city=islamabad">Islamabad Properties</a></li>
-                <li><a href="/?city=karachi">Karachi Properties</a></li>
-                <li><a href="/?city=rawalpindi">Rawalpindi Properties</a></li>
-                <li><a href="/?city=faisalabad">Faisalabad Properties</a></li>
-              </ul>
-            </div>
-
-            <div className="footer-col">
-              <h4>Newsletter</h4>
-              <p>Subscribe for new property updates</p>
-              <NewsletterForm />
+            <div className="footer-bottom">
+              <p>
+                {/* The copyright symbol is the Admin login trigger */}
+                <span
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => nav("/admin")}
+                  title="Admin Login"
+                >
+                  &copy;
+                </span>
+                2024 RICHMOORESTATE & BUILDERS. All rights reserved.
+              </p>
+              <div className="footer-links">
+                <Link to="/">Privacy Policy</Link>
+                <Link to="/">Terms & Conditions</Link>
+              </div>
             </div>
           </div>
-
-          <div className="footer-bottom">
-            <p>
-              {/* The copyright symbol is the Admin login trigger */}
-              <span
-                style={{ cursor: "pointer", userSelect: "none" }}
-                onClick={() => nav("/admin")}
-                title="Admin Login"
-              >
-                &copy;
-              </span>
-              2024 RICHMOORESTATE & BUILDERS. All rights reserved.
-            </p>
-            <div className="footer-links">
-              <Link to="/">Privacy Policy</Link>
-              <Link to="/">Terms & Conditions</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </>
   );
 }
