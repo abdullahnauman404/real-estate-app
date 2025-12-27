@@ -12,17 +12,17 @@ export default function Modal({ open, title, onClose, children, width = 900 }) {
   if (!open) return null;
 
   return (
-    <div className="modal-backdrop" onMouseDown={onClose}>
+    <div className="modal open" onMouseDown={onClose}>
       <div
-        className="modal"
+        className="modal-content"
         style={{ maxWidth: width }}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="modal-head">
           <h3>{title}</h3>
-          <button className="btn btn-ghost" onClick={onClose}>
+          <div className="close-modal" onClick={onClose}>
             <i className="fas fa-times" />
-          </button>
+          </div>
         </div>
         <div className="modal-body">{children}</div>
       </div>
