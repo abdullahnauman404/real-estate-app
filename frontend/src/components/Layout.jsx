@@ -91,7 +91,43 @@ export default function Layout({ children, hideFooter = false }) {
             </div>
           </Link>
 
-          <div className={`nav-menu ${mobileMenuOpen ? "active" : ""}`}>
+          <div className="nav-links-container">
+            <ScrollLink to="/"><i className="fas fa-home"></i> Home</ScrollLink>
+            <ScrollLink to="/#properties"><i className="fas fa-building"></i> Properties</ScrollLink>
+            <ScrollLink to="/#maps"><i className="fas fa-map"></i> Maps</ScrollLink>
+            <ScrollLink to="/#certificates"><i className="fas fa-award"></i> Certificates</ScrollLink>
+            <ScrollLink to="/#services"><i className="fas fa-concierge-bell"></i> Services</ScrollLink>
+            <ScrollLink to="/#about"><i className="fas fa-info-circle"></i> About</ScrollLink>
+            <ScrollLink to="/#contact"><i className="fas fa-phone-alt"></i> Contact</ScrollLink>
+          </div>
+
+          <div className="nav-actions-container">
+            {token ? (
+              <button
+                className="admin-btn"
+                style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.9rem' }}
+                onClick={() => {
+                  setToken(null);
+                  closeMobileMenu();
+                  nav("/admin");
+                }}
+              >
+                <i className="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+              </button>
+            ) : null}
+
+            <a
+              href="/#contact"
+              className="btn btn-primary"
+              onClick={closeMobileMenu}
+            >
+              <i className="fas fa-question-circle"></i> Quick Inquiry
+            </a>
+          </div>
+
+          {/* Mobile version of the menu */}
+          <div className={`nav-menu-mobile ${mobileMenuOpen ? "active" : ""}`}>
             <div className="nav-links">
               <ScrollLink to="/"><i className="fas fa-home"></i> Home</ScrollLink>
               <ScrollLink to="/#properties"><i className="fas fa-building"></i> Properties</ScrollLink>
@@ -101,12 +137,11 @@ export default function Layout({ children, hideFooter = false }) {
               <ScrollLink to="/#about"><i className="fas fa-info-circle"></i> About</ScrollLink>
               <ScrollLink to="/#contact"><i className="fas fa-phone-alt"></i> Contact</ScrollLink>
             </div>
-
+            
             <div className="nav-actions">
-              {token ? (
+               {token && (
                 <button
                   className="admin-btn"
-                  style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.9rem' }}
                   onClick={() => {
                     setToken(null);
                     closeMobileMenu();
@@ -116,13 +151,8 @@ export default function Layout({ children, hideFooter = false }) {
                   <i className="fas fa-sign-out-alt"></i>
                   <span>Logout</span>
                 </button>
-              ) : null}
-
-              <a
-                href="/#contact"
-                className="btn btn-primary"
-                onClick={closeMobileMenu}
-              >
+              )}
+              <a href="/#contact" className="btn btn-primary" onClick={closeMobileMenu}>
                 <i className="fas fa-question-circle"></i> Quick Inquiry
               </a>
             </div>
